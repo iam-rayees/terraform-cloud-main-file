@@ -19,6 +19,7 @@ module "dev_nat" {
   version                = "1.0.0"
   public_subnet_id       = module.dev_vpc_1.public-subnet[0]
   private_route_table_id = module.dev_vpc_1.private_route_table_id
+  vpc_id                 = module.dev_vpc_1.vpc_id
 }
 
 data "aws_acm_certificate" "cert" {
