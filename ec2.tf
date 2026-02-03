@@ -13,5 +13,4 @@ module "dev_ec2_1" {
   public-subnet  = module.dev_vpc_1.public-subnet
   sg_id          = module.dev_sg_1.sg_id
   private-subnet = module.dev_vpc_1.private-subnet
-  nat_gw         = module.dev_nat.nat_gw
 }
