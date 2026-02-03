@@ -8,7 +8,6 @@ module "dev_ec2_1" {
   amis = {
     us-east-1 = "ami-0b6c6ebed2801a5cb"
     us-east-2 = "ami-06e3c045d79fd65d9"
-    nat_gw    = true
   }
   vpc_name       = module.dev_vpc_1.vpc_name
   public-subnet  = module.dev_vpc_1.public-subnet
