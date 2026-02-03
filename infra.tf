@@ -8,18 +8,21 @@ module "dev_vpc_1" {
   public_subnet_cidr  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   private_subnet_cidr = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
   az_name             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  nat_gw              = module.dev_nat.nat_gw
 
 }
 
 
 module "dev_nat" {
   # source                 = "../modules/nat"
-  source                 = "app.terraform.io/rayeez_devsecops/terraform-modules-nat/aws"
-  version                = "1.0.0"
-  public_subnet_id       = module.dev_vpc_1.public-subnet[0]
-  private_route_table_id = module.dev_vpc_1.private_route_table_id
-  vpc_id                 = module.dev_vpc_1.vpc_id
+  source              = "app.terraform.io/rayeez_devsecops/terraform-modules-nat/aws"
+  version             = "1.0.0"
+  vpc_cidr            = "10.0.0.0/16"
+  vpc_name            = "dev_vpc_1"
+  environment         = "development"
+  public_subnet_cidr  = ["10.0.1.0/24"]
+  private_subnet_cidr = ["10.0.10.0/24", "10.0.20.0/24", "10.0.30.0/24"]
+  az_name             = ["us-east-1a"]
+  nat_gw              = true
 }
 
 data "aws_acm_certificate" "cert" {
@@ -56,5 +59,3 @@ resource "aws_route53_record" "dev" {
     evaluate_target_health = true
   }
 }
-
-
