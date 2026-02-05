@@ -48,8 +48,6 @@ module "dev_instance_1" {
   sg_id                = module.dev_sg_1.sg_id
   private_subnet_id    = module.dev_vpc_1.private_subnet_id
   iam_instance_profile = module.dev_iam_1.iam_instance_profile
-  elb_listener_public  = module.dev_elb_1.elb_listener_public
-
 }
 
 data "aws_acm_certificate" "cert" {
@@ -71,6 +69,7 @@ module "dev_elb_1" {
   vpc_id          = module.dev_vpc_1.vpc_id
   environment     = module.dev_vpc_1.environment
   certificate_arn = data.aws_acm_certificate.cert.arn
+  depends_on      = [module.dev_instance_1]
 }
 
 module "dev_iam_1" {
