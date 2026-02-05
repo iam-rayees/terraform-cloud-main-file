@@ -11,18 +11,15 @@ module "dev_vpc_1" {
 }
 
 module "dev_sg_1" {
-  # source        = "../modules/sg"
   source        = "app.terraform.io/Rayeez_Terra/sg/aws"
   version       = "1.0.0"
   vpc_id        = module.dev_vpc_1.vpc_id
   service_ports = ["80", "443", "8080", "8443", "22", "1443", "3306", "1900"]
   environment   = module.dev_vpc_1.environment
   vpc_name      = module.dev_vpc_1.vpc_name
-
 }
 
 module "dev_natgw_1" {
-  # source             = "../modules/nat"
   source                 = "app.terraform.io/Rayeez_Terra/nat/aws"
   version                = "1.0.0"
   public_subnet_id       = module.dev_vpc_1.public_subnet[0]
@@ -30,20 +27,20 @@ module "dev_natgw_1" {
 }
 
 module "dev_instance_1" {
-  # source = "../modules/compute"
   source  = "app.terraform.io/Rayeez_Terra/compute/aws"
   version = "1.0.0"
   amis = {
     us-east-1 = "ami-0b6c6ebed2801a5cb"
     us-east-2 = "ami-06e3c045d79fd65d9"
   }
-  aws_region     = var.aws_region
-  environment    = module.dev_vpc_1.environment
-  key_name       = "Linux_secfile"
-  vpc_name       = module.dev_vpc_1.vpc_name
-  public-subnet  = module.dev_vpc_1.public_subnet
-  sg_id          = module.dev_sg_1.sg_id
-  private-subnet = module.dev_vpc_1.private_subnet
+  aws_region           = var.aws_region
+  environment          = module.dev_vpc_1.environment
+  key_name             = "Linux_secfile"
+  vpc_name             = module.dev_vpc_1.vpc_name
+  public_subnet        = module.dev_vpc_1.public_subnet
+  sg_id                = module.dev_sg_1.sg_id
+  private_subnet       = module.dev_vpc_1.private_subnet
+  iam_instance_profile = module.dev_iam_1.iam_instance_profile
 }
 
 data "aws_acm_certificate" "cert" {
@@ -56,20 +53,24 @@ data "aws_acm_certificate" "cert" {
 module "dev_elb_1" {
   source          = "app.terraform.io/Rayeez_Terra/elb/aws"
   version         = "1.0.0"
-  subnets         = module.dev_vpc_1.public_subnet_id
+  subnets         = module.dev_vpc_1.public_subnet
   security_groups = [module.dev_sg_1.sg_id]
   instance_ids = concat(
     module.dev_instance_1.public_instance_ids,
     module.dev_instance_1.private_instance_ids
   )
-  vpc_id          = module.dev_vpc_1.vpc_id
-  environment     = module.dev_vpc_1.environment
-  certificate_arn = data.aws_acm_certificate.cert.arn
-  depends_on      = [module.dev_instance_1]
+  vpc_id               = module.dev_vpc_1.vpc_id
+  environment          = module.dev_vpc_1.environment
+  certificate_arn      = data.aws_acm_certificate.cert.arn
+  name                 = "dev-elb"
+  tgname               = "dev-tg"
+  public_subnet_id     = module.dev_vpc_1.public_subnet[0]
+  public_instance_ids  = module.dev_instance_1.public_instance_ids
+  private_instance_ids = module.dev_instance_1.private_instance_ids
+  depends_on           = [module.dev_instance_1]
 }
 
 module "dev_iam_1" {
-  # source              = "../modules/iam"
   source              = "app.terraform.io/Rayeez_Terra/iam/aws"
   version             = "1.0.0"
   instanceprofilename = "${module.dev_vpc_1.vpc_name}-inst-profile"
